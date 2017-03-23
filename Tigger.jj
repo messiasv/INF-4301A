@@ -1,14 +1,17 @@
 // Options for JavaCC.
-options { LOOKAHEAD=1; FORCE_LA_CHECK=true; }
+options { LOOKAHEAD=1; FORCE_LA_CHECK=true; STATIC=false;}
 
 // Fonction principale
 PARSER_BEGIN(Tigger)
 public class Tigger
 {
     public static void main(String args[]) throws ParseException
-    {
+    {while(true){
+				System.out.println("Please insert an expression:");
         Tigger parser = new Tigger(System.in);
-        parser.mainloop();
+        Exp a = parser.mainloop();
+        System.out.println("Evaluation of "+PrettyPrinter.visit(a)+" give the result "+ Evaluateur.visit(a));
+        }
     }
 }
 PARSER_END(Tigger)
@@ -25,57 +28,60 @@ TOKEN:
 }
 
 // Main lopp: read expressions on a line until end of file.
-//     mainloop → (expression <EOL>)* <EOF>
-void mainloop():
-{ double a; }
+//     mainloop -> (expression <EOL>)* <EOF>
+Exp mainloop():
+{ Exp a; }
 {
     (
-      a=expression() <EOL> { System.out.println(a); }
+      a=expression() <EOL> { return a; }
     )*
     <EOF>
 }
 
+//E -> T(+T|-T)
+//T -> F(*F|/F)
+//F -> <NUM> |(E)
+
 // Expression (the axiom).
-// E -> T ( "+"T | "-"T )*
-// T -> F ( "*"F | "/"F )*
-// F -> <NUM> | "("E")"
-double expression():
-{ double a,b; }
+Exp expression():
+{Exp a,b;}
 {
-    a=term()
-    (
-      "+" b=term() { a += b; }
-    | "-" b=term() { a -= b; }
-    )* { return a; }
+	a = term()
+	(
+		"+" b=term() {return new Add(a,b);}
+	|	"-" b=term() {return new Sub(a,b);}
+	)*	{return a;}
 }
 
-double term():
-{ double a,b; }
+Exp term():
+{Exp a,b;}
 {
-		a=factor()
-		(
-      "*" b=factor() { a *= b; }
-    | "/" b=factor() { a /= b; }
-		)* { return a; }
+	a = factor()
+	(
+		"*" b=factor() {return new Mul(a,b);}
+	|	"/" b=factor() {return new Div(a,b);}
+	)*	{return a;}
 }
 
 
-
-// Element of an expression.
-double factor(): // TODO: return an expression
-{ Token t; double a;}
+// Factor of an expression.
+Exp factor():
+{ Token t; Exp a; }
 {
-    t=<NUMBER> { return Double.parseDouble(t.toString()); }
-|		(
-			"(" a=expression()
-			")" {return a;}
-		)
+    t=<NUMBER> { return new Number(Double.parseDouble(t.toString())); }
+|	(
+		"("	a=expression()
+		")" {return a;}
+	)
 }
 
-// /Exp/
-//  + /Bin/ Exp Exp
-//  |   +-- Add
-//  |   +-- Sub
-//  |   +-- Mul
-//  |   +-- Div
-//  + Number double
+/*
+Make AST :
+/Exp/
+	/Bin/ Exp Exp
+		Add
+		Sub
+		Mul
+		Div
+	Number double
+*/
