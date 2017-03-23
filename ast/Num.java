@@ -1,21 +1,19 @@
-public class Number extends Exp{
+package ast;
+
+public class Num extends Exp{
 
 	private double value;
 
-	public Number(double value){
+	public Num(double value){
 		this.value = value;
 	}
 
 	public double getValue(){
-		return value;	
+		return value;
 	}
 
 	public void setValue(double value){
 		this.value = value;
-	}
-
-void accept(Visiteur v){
-		v.visit(this);
 	}
 
 }

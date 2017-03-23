@@ -3,6 +3,8 @@ options { LOOKAHEAD=1; FORCE_LA_CHECK=true; STATIC=false;}
 
 // Fonction principale
 PARSER_BEGIN(Tigger)
+import ast.*;
+
 public class Tigger
 {
     public static void main(String args[]) throws ParseException
@@ -68,7 +70,7 @@ Exp term():
 Exp factor():
 { Token t; Exp a; }
 {
-    t=<NUMBER> { return new Number(Double.parseDouble(t.toString())); }
+    t=<NUMBER> { return new Num(Double.parseDouble(t.toString())); }
 |	(
 		"("	a=expression()
 		")" {return a;}
@@ -83,5 +85,5 @@ Make AST :
 		Sub
 		Mul
 		Div
-	Number double
+	Num double
 */

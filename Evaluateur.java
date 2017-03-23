@@ -1,6 +1,8 @@
+import ast.*;
+
 public class Evaluateur{
 	public static double visit(Exp e){
-		switch(e.getClass().getName()) {
+		switch(e.getClass().getSimpleName()) {
 			case "Add":
 				return visit(((Bin)e).getLeft()) + visit(((Bin)e).getRight());
 			case "Sub":
@@ -9,8 +11,8 @@ public class Evaluateur{
 				return visit(((Bin)e).getLeft()) / visit(((Bin)e).getRight());
 			case "Mul":
 				return visit(((Bin)e).getLeft()) * visit(((Bin)e).getRight());
-			case "Number":
-				return ((Number)e).getValue();
+			case "Num":
+				return ((Num)e).getValue();
 		}
 		return 34404;
 	}

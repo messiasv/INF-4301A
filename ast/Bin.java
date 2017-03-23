@@ -1,3 +1,5 @@
+package ast;
+
 public abstract class Bin extends Exp{
 	protected Exp right;
 	protected Exp left;
