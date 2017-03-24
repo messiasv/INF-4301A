@@ -50,8 +50,8 @@ Exp expression():
 {
 	a = term()
 	(
-		"+" b=term() {return new Add(a,b);}
-	|	"-" b=term() {return new Sub(a,b);}
+		"+" b=term() {a= new Add(a,b);}
+	|	"-" b=term() {a= new Sub(a,b);}
 	)*	{return a;}
 }
 
@@ -60,8 +60,8 @@ Exp term():
 {
 	a = factor()
 	(
-		"*" b=factor() {return new Mul(a,b);}
-	|	"/" b=factor() {return new Div(a,b);}
+		"*" b=factor() {a= new Mul(a,b);}
+	|	"/" b=factor() {a= new Div(a,b);}
 	)*	{return a;}
 }
 
