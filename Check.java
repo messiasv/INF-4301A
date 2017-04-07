@@ -40,5 +40,15 @@ public class Check {
 			System.out.println("1 + 2 + 3 =? 6");
 			assert Evaluateur.visit(new Add(new Add(new Num(1), new Num(2)), new Num(3))) == 6.0;
 			System.out.println(ANSI_GREEN + "\t\t\t\t\t\t\t\tOk" + ANSI_RESET);
+
+
+			System.out.println("-8 + -7 =? -15");
+			assert Evaluateur.visit(new Add(new Minus(new Num(8)), new Minus(new Num(7)))) == -15.0;
+			System.out.println(ANSI_GREEN + "\t\t\t\t\t\t\t\tOk" + ANSI_RESET);
+
+
+			System.out.println("-(42 + 51) =? -93");
+			assert Evaluateur.visit(new Minus(new Add(new Num(42), new Num(51)))) == -93.0;
+			System.out.println(ANSI_GREEN + "\t\t\t\t\t\t\t\tOk" + ANSI_RESET);
 	}
 }

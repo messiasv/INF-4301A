@@ -58,13 +58,22 @@ Exp expression():
 Exp term():
 {Exp a,b;}
 {
-	a = factor()
+	a = unary()
 	(
-		"*" b=factor() {a= new Mul(a,b);}
-	|	"/" b=factor() {a= new Div(a,b);}
+		"*" b=unary() {a= new Mul(a,b);}
+	|	"/" b=unary() {a= new Div(a,b);}
 	)*	{return a;}
 }
 
+Exp unary():
+{Token t; Exp a;}
+{
+    t=<NUMBER> { return new Num(Double.parseDouble(t.toString())); }
+|	(
+    "+" a = factor() {a = new Plus(a);}
+  | "-" a = factor() {a = new Minus(a);}
+  ) {return a;}
+}
 
 // Factor of an expression.
 Exp factor():

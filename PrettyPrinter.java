@@ -13,6 +13,10 @@ public class PrettyPrinter{
 				return "("+ visit(((Bin)e).getLeft()) +" * "+ visit(((Bin)e).getRight())+")";
 			case "Num":
 				return ""+((Num)e).getValue();
+			case "Plus":
+				return visit(((Unary)e).getFactor());
+			case "Minus":
+				return "-" + visit(((Unary)e).getFactor());
 		}
 		return e.getClass().getSimpleName();
 	}
