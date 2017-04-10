@@ -72,7 +72,11 @@ Exp unary():
 |	(
     "+" a = factor() {a = new Plus(a);}
   | "-" a = factor() {a = new Minus(a);}
-  ) {return a;}
+  ){return a;}
+| (
+    "(" a=expression()
+    ")" {return a;}
+  )
 }
 
 // Factor of an expression.
