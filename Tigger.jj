@@ -12,7 +12,7 @@ public class Tigger
 				System.out.println("Please insert an expression:");
         Tigger parser = new Tigger(System.in);
         Exp a = parser.mainloop();
-        System.out.println("Evaluation of "+PrettyPrinter.visit(a)+" give the result "+ Evaluateur.visit(a));
+        //System.out.println("Evaluation of "+PrettyPrinter.visit(a)+" give the result "+ Evaluateur.visit(a));
         }
     }
 }
@@ -34,8 +34,14 @@ TOKEN:
 Exp mainloop():
 { Exp a; }
 {
-    (
-      a=expression() <EOL> { return a; }
+    (//Permet d'affcher le résultat du calcul
+    "print(" a = expression() ")" <EOL> {System.out.println(""+Evaluateur.visit(a));
+                                         return a;}
+     )*
+     <EOF>
+
+  | (//On n'affiche pas le résultat ici
+      a = expression() <EOL> {return a;}
     )*
     <EOF>
 }
@@ -44,7 +50,6 @@ Exp mainloop():
 //T -> F(*F|/F)
 //F -> <NUM> |(E)
 
-// Expression (the axiom).
 Exp expression():
 {Exp a,b;}
 {
