@@ -35,13 +35,13 @@ Exp mainloop():
 { Exp a; }
 {
     (//Permet d'affcher le résultat du calcul
-    "print(" a = expression() ")" <EOL> {System.out.println(""+Evaluateur.visit(a));
+    "print(" a = comp() ")" <EOL> {System.out.println(""+Evaluateur.visit(a));
                                          return a;}
      )*
      <EOF>
 
   | (//On n'affiche pas le résultat ici
-      a = expression() <EOL> {return a;}
+      a = comp() <EOL> {return a;}
     )*
     <EOF>
 }
@@ -49,6 +49,20 @@ Exp mainloop():
 //E -> T(+T|-T)
 //T -> F(*F|/F)
 //F -> <NUM> |(E)
+
+Exp comp():
+{Exp a,b;}
+{
+  a = expression()
+  (
+    "="  b = expression() {a = new Eq(a,b);}
+  | "<>" b = expression() {a = new Ne(a,b);}
+  | "<=" b = expression() {a = new Le(a,b);}
+  | "<"  b = expression() {a = new Lt(a,b);}
+  | ">=" b = expression() {a = new Ge(a,b);}
+  | ">"  b = expression() {a = new Gt(a,b);}
+  ) {return a;}
+}
 
 Exp expression():
 {Exp a,b;}
