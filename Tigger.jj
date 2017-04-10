@@ -61,6 +61,7 @@ Exp comp():
   | "<"  b = expression() {a = new Lt(a,b);}
   | ">=" b = expression() {a = new Ge(a,b);}
   | ">"  b = expression() {a = new Gt(a,b);}
+  | {return a;} // if we haven't any comparison to do
   ) {return a;}
 }
 
