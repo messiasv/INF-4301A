@@ -9,7 +9,7 @@ public class Tigger
 {
     public static void main(String args[]) throws ParseException
     {while(true){
-				System.out.println("Please insert an expression:");
+			  System.out.println("Please insert an expression:");
         Tigger parser = new Tigger(System.in);
         Exp a = parser.mainloop();
         //System.out.println("Evaluation of "+PrettyPrinter.visit(a)+" give the result "+ Evaluateur.visit(a));
@@ -34,14 +34,14 @@ TOKEN:
 Exp mainloop():
 { Exp a; }
 {
-    (//Permet d'affcher le résultat du calcul
-    "print(" a = comp() ")" <EOL> {System.out.println(""+Evaluateur.visit(a));
+    (//Print the result
+    "print(" a = ifThenElse() ")" <EOL> {System.out.println(""+Evaluateur.visit(a));
                                          return a;}
      )*
      <EOF>
 
-  | (//On n'affiche pas le résultat ici
-      a = comp() <EOL> {return a;}
+  | (//Don't print the result
+      a = ifThenElse() <EOL> {return a;}
     )*
     <EOF>
 }
@@ -49,6 +49,18 @@ Exp mainloop():
 //E -> T(+T|-T)
 //T -> F(*F|/F)
 //F -> <NUM> |(E)
+
+Exp ifThenElse():
+{Exp a,b,c;}
+{
+  (//In case there is an if then else operator
+    "if" a = ifThenElse() "then" b = expression() "else" c=expression() {if(Evaluateur.visit(a)==1){return b;}else return c;}
+  )
+  |(//In case there is no if then else operator
+    a = comp() {return a;}
+  ) {return a;}
+}
+
 
 Exp comp():
 {Exp a,b;}
