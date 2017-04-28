@@ -6,12 +6,17 @@ PARSER_BEGIN(Tigger)
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.HashMap;
+import java.util.Stack;
 import ast.*;
 
 public class Tigger
 {
+    public static Stack<HashMap<String, Exp>> stack;
     public static void main(String args[]) throws ParseException
     {
+        stack = new Stack<HashMap<String, Exp>>();
+
         Tigger parser = null;
 				if(args.length>0) {
           try {
@@ -42,6 +47,16 @@ TOKEN:
     < NUMBER: (<DIGIT>)+ ("." (<DIGIT>)*)? >  // A decimal number.
 |   < DIGIT: ["0"-"9"] >                      // A decimal digit.
 |   < EOL: "\n" >                             // End of line.
+|   < PRINT: "print">
+|   <IF: "if">
+|   <THEN: "then">
+|   <ELSE: "else">
+|   <LET: "let">
+|   <IN: "in">
+|   <END: "end">
+|   <VAR: "var">
+|   < WORD: <LETTER> ((<DIGIT>)* ((<LETTER>)*)?)?>
+|   < LETTER: ["a"-"z","A"-"Z"]>
 }
 
 // Main lopp: read expressions on a line until end of file.
@@ -52,7 +67,7 @@ void mainloop():
 { Exp a; }
 {
     (//Print the result
-    "print(" a = ifThenElse() ")" <EOL> {
+    <PRINT> "(" a = letInEnd() ")" <EOL> {
       System.out.println("pretty-print: " + PrettyPrinter.visit(a));
       System.out.println("eval: "+Evaluateur.visit(a) + "\n");
     }
@@ -60,12 +75,26 @@ void mainloop():
      <EOF>
 
   | (//Don't print the result
-      a = ifThenElse() <EOL> {
+      a = letInEnd() <EOL> {
         System.out.println("pretty-print: "+PrettyPrinter.visit(a));
         System.out.println("eval: "+Evaluateur.visit(a) + "\n");
       }
     )*
     <EOF>
+}
+
+Exp letInEnd():
+{Token t; Exp a=null; Exp b; }
+{
+  <LET> {HashMap<String, Exp> scope = new HashMap<String, Exp>();
+        stack.push(scope);}
+  ("var" t=<WORD> ":=" b=ifThenElse() {Exp exist = scope.put(t.toString(), b);
+                                          if(exist != null){
+                                            System.out.println("This variable already exists...");
+                                            System.exit(0);
+                                          }}
+  )*
+  <IN> (a=ifThenElse())* <END> {return a;}
 }
 
 //E -> T(+T|-T)
@@ -76,7 +105,7 @@ Exp ifThenElse():
 {Exp a,b,c;}
 {
   (//In case there is an if then else operator
-    "if" a = ifThenElse() "then" b = ifThenElse() "else" c=ifThenElse() {if(Evaluateur.visit(a)==1){return b;}else return c;}
+    <IF> a = ifThenElse() <THEN> b = ifThenElse() <ELSE> c=ifThenElse() {if(Evaluateur.visit(a)==1){return b;}else return c;}
   )
   |(//In case there is no if then else operator
     a = comp() {return a;}
@@ -112,11 +141,36 @@ Exp expression():
 Exp term():
 {Exp a,b;}
 {
-	a = unary()
+	a = change()
 	(
-		"*" b=unary() {a= new Mul(a,b);}
-	|	"/" b=unary() {a= new Div(a,b);}
+		"*" b=change() {a= new Mul(a,b);}
+	|	"/" b=change() {a= new Div(a,b);}
 	)*	{return a;}
+}
+
+Exp var():
+{Token t; Exp a, b;}
+{
+  t = <WORD> {
+    Stack<HashMap<String, Exp>> s = (Stack<HashMap<String, Exp>>) stack.clone();
+    HashMap<String, Exp> l;
+    while(!s.empty()) {
+      l = (HashMap<String, Exp>) s.pop();
+      if(l.containsKey(t.toString())) {
+        Var v = new Var(t.toString(), l.get(t.toString()));
+        return v;
+      }
+    }
+    System.out.println("Variable " + t.toString() + " does not exist !!");
+    System.exit(0);
+  }
+}
+
+Exp change():
+{Exp a;}
+{
+  a = unary() {return a;}
+  | a = var() {return a;}
 }
 
 Exp unary():

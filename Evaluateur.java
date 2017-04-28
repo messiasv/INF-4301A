@@ -29,6 +29,8 @@ public class Evaluateur{
 				return visit(((Bin)e).getLeft()) >= visit(((Bin)e).getRight()) ? 1 : 0;
 			case "Gt":
 				return visit(((Bin)e).getLeft()) >  visit(((Bin)e).getRight()) ? 1 : 0;
+			case "Var":
+				return visit(((Var)e).getValue());
 			default:
 				throw new Error("Unknown case found!");
 		}
