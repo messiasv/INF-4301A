@@ -3,16 +3,31 @@ options { LOOKAHEAD=1; FORCE_LA_CHECK=true; STATIC=false;}
 
 // Fonction principale
 PARSER_BEGIN(Tigger)
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import ast.*;
 
 public class Tigger
 {
     public static void main(String args[]) throws ParseException
-    {while(true){
-			  System.out.println("Please insert an expression:");
-        Tigger parser = new Tigger(System.in);
-        Exp a = parser.mainloop();
-        //System.out.println("Evaluation of "+PrettyPrinter.visit(a)+" give the result "+ Evaluateur.visit(a));
+    {
+        Tigger parser = null;
+				if(args.length>0) {
+          try {
+            InputStream is = new FileInputStream(args[0]);
+            parser = new Tigger(is);
+            parser.mainloop();
+          }
+            catch(IOException e){
+							e.printStackTrace();
+					}
+				} else {
+          while(true){
+      			  System.out.println("Please insert an expression:");
+	            parser = new Tigger(System.in);
+              parser.mainloop();
+			    }
         }
     }
 }
@@ -31,17 +46,24 @@ TOKEN:
 
 // Main lopp: read expressions on a line until end of file.
 //     mainloop -> (expression <EOL>)* <EOF>
-Exp mainloop():
+// System.out.println("pretty-print: "+PrettyPrinter.visit(a));
+// System.out.println("eval: "+Evaluateur.visit(a)+"\n");
+void mainloop():
 { Exp a; }
 {
     (//Print the result
-    "print(" a = ifThenElse() ")" <EOL> {System.out.println(""+Evaluateur.visit(a));
-                                         return a;}
+    "print(" a = ifThenElse() ")" <EOL> {
+      System.out.println("pretty-print: " + PrettyPrinter.visit(a));
+      System.out.println("eval: "+Evaluateur.visit(a) + "\n");
+    }
      )*
      <EOF>
 
   | (//Don't print the result
-      a = ifThenElse() <EOL> {return a;}
+      a = ifThenElse() <EOL> {
+        System.out.println("pretty-print: "+PrettyPrinter.visit(a));
+        System.out.println("eval: "+Evaluateur.visit(a) + "\n");
+      }
     )*
     <EOF>
 }
