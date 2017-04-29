@@ -76,8 +76,10 @@ void mainloop():
 
   | (//Don't print the result
       a = letInEnd() <EOL> {
-        System.out.println("pretty-print: "+PrettyPrinter.visit(a));
-        System.out.println("eval: "+Evaluateur.visit(a) + "\n");
+        if(a!=null){
+          System.out.println("pretty-print: "+PrettyPrinter.visit(a));
+          System.out.println("eval: "+Evaluateur.visit(a) + "\n");
+        }
       }
     )*
     <EOF>
