@@ -14,7 +14,7 @@ public class PrettyPrinter{
 			case "Num":
 				return ""+((Num)e).getValue();
 			case "Plus":
-				return visit(((Unary)e).getFactor());
+				return ""+visit(((Unary)e).getFactor());
 			case "Minus":
 				return "-" + visit(((Unary)e).getFactor());
 			case "Eq":
@@ -29,6 +29,14 @@ public class PrettyPrinter{
 				return visit(((Bin)e).getLeft()) +" > " + visit(((Bin)e).getRight());
 			case "Gt":
 				return visit(((Bin)e).getLeft()) +" > " + visit(((Bin)e).getRight());
+			case "Var":
+				return "var "+((Var)e).getName()+" := "+visit(((Var)e).getValue());
+			case "Print":
+				Exp tmp = ((Print)e).getPrint();
+				if(tmp.getClass().getSimpleName().equals("Var")){
+					return "print("+((Var)tmp).getName()+")";
+				}else
+					return "print("+visit(tmp)+")";
 		}
 		return e.getClass().getSimpleName();
 	}

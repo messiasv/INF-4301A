@@ -15,6 +15,7 @@ public class Tigger
     public static Stack<HashMap<String, Exp>> stack;
     public static void main(String args[]) throws ParseException
     {
+
         stack = new Stack<HashMap<String, Exp>>();
 
         Tigger parser = null;
@@ -66,19 +67,11 @@ TOKEN:
 void mainloop():
 { Exp a; }
 {
-    (//Print the result
-    <PRINT> "(" a = letInEnd() ")" <EOL> {
-      System.out.println("pretty-print: " + PrettyPrinter.visit(a));
-      System.out.println("eval: "+Evaluateur.visit(a) + "\n");
-    }
-     )*
-     <EOF>
-
-  | (//Don't print the result
+    (
       a = letInEnd() <EOL> {
         if(a!=null){
-          System.out.println("pretty-print: "+PrettyPrinter.visit(a));
-          System.out.println("eval: "+Evaluateur.visit(a) + "\n");
+          System.out.println("Pretty Print: \n"+PrettyPrinter.visit(a));
+          System.out.println("Evaluation: \n"+Evaluateur.visit(a) + "\n");
         }
       }
     )*
@@ -150,6 +143,15 @@ Exp term():
 	)*	{return a;}
 }
 
+Exp change():
+{Exp a;}
+{
+  a = unary() {return a;}
+  | a = var() {return a;}
+  | "(" a=comp() ")" {return a;}
+  | a = print() {return a;}
+}
+
 Exp var():
 {Token t; Exp a, b;}
 {
@@ -168,11 +170,10 @@ Exp var():
   }
 }
 
-Exp change():
-{Exp a;}
+Exp print():
+{Token t; Exp a;}
 {
-  a = unary() {return a;}
-  | a = var() {return a;}
+  t=<PRINT> "(" a=comp() ")" {return new Print(a);}
 }
 
 Exp unary():
@@ -183,10 +184,6 @@ Exp unary():
     "+" a = factor() {a = new Plus(a);}
   | "-" a = factor() {a = new Minus(a);}
   ){return a;}
-| (
-    "(" a=expression()
-    ")" {return a;}
-  )
 }
 
 // Factor of an expression.
@@ -194,10 +191,6 @@ Exp factor():
 { Token t; Exp a; }
 {
     t=<NUMBER> { return new Num(Double.parseDouble(t.toString())); }
-|	(
-		"("	a=expression()
-		")" {return a;}
-	)
 }
 
 /*

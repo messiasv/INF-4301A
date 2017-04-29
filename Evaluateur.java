@@ -31,6 +31,9 @@ public class Evaluateur{
 				return visit(((Bin)e).getLeft()) >  visit(((Bin)e).getRight()) ? 1 : 0;
 			case "Var":
 				return visit(((Var)e).getValue());
+			case "Print":
+				System.out.println("Print:\n"+visit(((Print)e).getPrint()));
+				return 0;
 			default:
 				throw new Error("Unknown case found!");
 		}
