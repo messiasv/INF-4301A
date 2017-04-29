@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Stack;
+import java.util.ArrayList;
 import ast.*;
 
 public class Tigger
@@ -58,6 +59,7 @@ TOKEN:
 |   <VAR: "var">
 |   < WORD: <LETTER> ((<DIGIT>)* ((<LETTER>)*)?)?>
 |   < LETTER: ["a"-"z","A"-"Z"]>
+|   <SEPARATOR: ",">
 }
 
 // Main lopp: read expressions on a line until end of file.
@@ -65,31 +67,39 @@ TOKEN:
 // System.out.println("pretty-print: "+PrettyPrinter.visit(a));
 // System.out.println("eval: "+Evaluateur.visit(a)+"\n");
 void mainloop():
-{ Exp a; }
+{ ArrayList<Exp> a; }
 {
     (
       a = letInEnd() <EOL> {
         if(a!=null){
-          System.out.println("Pretty Print: \n"+PrettyPrinter.visit(a));
-          System.out.println("Evaluation: \n"+Evaluateur.visit(a) + "\n");
+          String pp = "Pretty Print: \n";
+          for(int i =0; i<a.size();i++){
+            pp+=PrettyPrinter.visit(a.get(i))+"\n";
+          }
+          System.out.println(pp);
+          double e=0;
+          for(int i =0; i<a.size();i++){
+            e=Evaluateur.visit(a.get(i));
+          }
+          System.out.println("Evaluation: \n"+e+ "\n"); //Fonctionne pas bien
         }
       }
     )*
     <EOF>
 }
 
-Exp letInEnd():
-{Token t; Exp a=null; Exp b; }
+ArrayList<Exp> letInEnd():
+{Token t; Exp a=null; Exp b; ArrayList<Exp> exp =new ArrayList<Exp>();}
 {
   <LET> {HashMap<String, Exp> scope = new HashMap<String, Exp>();
         stack.push(scope);}
   ("var" t=<WORD> ":=" b=ifThenElse() {Exp exist = scope.put(t.toString(), b);
                                           if(exist != null){
-                                            System.out.println("This variable already exists...");
+                                            System.out.println("Error: Variable "+ t.toString()+" already declared in this scope");
                                             System.exit(0);
                                           }}
   )*
-  <IN> (a=ifThenElse())* <END> {return a;}
+  <IN> (a=ifThenElse() {exp.add(a);}(<SEPARATOR>)?)* <END> {return exp;}
 }
 
 //E -> T(+T|-T)
