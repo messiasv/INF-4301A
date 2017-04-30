@@ -69,7 +69,7 @@ void mainloop():
       a = letInEnd() <EOL> {
         if(a!=null){
           System.out.println("Pretty Print:\n" + PrettyPrinter.visit(a) + "\n");
-          System.out.println("Evaluation: " + Evaluateur.visit(a) + "\n");
+          //System.out.println("Evaluation: " + Evaluateur.visit(a) + "\n");
           System.out.println("******************************************************");
           stack.clear();
         }
@@ -157,21 +157,22 @@ Exp term():
 }
 
 Exp change():
-{Exp a;}
+{Token t; Exp a;}
 {
   a = unary() {return a;}
-  | a = var() {return a;}
   | "(" a=comp() ")" {return a;}
   | a = print() {return a;}
   | a = letInEnd() {return a;}
+  | t = <WORD> (
+  ":=" a = affectation(t){return a;}
+  | a = var(t){return a;}
+  )
 }
 
-Exp var():
-{Token t; Exp a, b;}
+Exp var(Token t):
+{Exp a, b;}
 {
-  t = <WORD> (
-    ":=" a = affectation(t){return a;}
-  |{Stack<HashMap<String, Exp>> s = (Stack<HashMap<String, Exp>>) stack.clone();
+  {Stack<HashMap<String, Exp>> s = (Stack<HashMap<String, Exp>>) stack.clone();
     HashMap<String, Exp> l;
     while(!s.empty()) {
       l = (HashMap<String, Exp>) s.pop();
@@ -182,13 +183,15 @@ Exp var():
     }
     System.out.println("Variable " + t.toString() + " does not exist !!");
     System.exit(0);
-  })
+  }
 }
 
 Exp print():
 {Token t; Exp a;}
 {
-  t=<PRINT> "(" a=comp() ")" {return new Print(a);}
+  t=<PRINT> "(" a=comp() ")" {
+    System.out.println("Evaluation : "+Evaluateur.visit(new Print(a))+"\n");
+    return new Print(a);}
 }
 
 Exp unary():

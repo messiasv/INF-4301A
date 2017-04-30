@@ -32,8 +32,7 @@ public class Evaluateur{
 			case "Var":
 				return visit(((Var)e).getValue());
 			case "Print":
-				System.out.println("Print:\n  "+visit(((Print)e).getPrint()));
-				return 0;
+				return visit(((Print)e).getPrint());
 			case "IfThenElse":
 				if(visit(((IfThenElse)e).getCond()) == 1.0) {
 					return visit(((IfThenElse)e).getTrueBranch());
