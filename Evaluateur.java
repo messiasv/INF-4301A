@@ -46,6 +46,8 @@ public class Evaluateur{
 					eval = visit(inst);
 				}
 				return eval;
+			case "Aff":
+				return visit(((Aff)e).getValue());
 			default:
 				throw new Error("Unknown case found!");
 		}

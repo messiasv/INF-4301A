@@ -48,6 +48,8 @@ public class PrettyPrinter{
 					LetInEndStr += " " + visit(instr) + "\n";
 				}
 				return LetInEndStr + "end\n";
+			case "Aff":
+				return ((Aff)e).getName() + " := " + visit(((Aff)e).getValue());
 		}
 		return e.getClass().getSimpleName();
 	}

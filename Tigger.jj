@@ -169,8 +169,9 @@ Exp change():
 Exp var():
 {Token t; Exp a, b;}
 {
-  t = <WORD> {
-    Stack<HashMap<String, Exp>> s = (Stack<HashMap<String, Exp>>) stack.clone();
+  t = <WORD> (
+    ":=" a = affectation(t){return a;}
+  |{Stack<HashMap<String, Exp>> s = (Stack<HashMap<String, Exp>>) stack.clone();
     HashMap<String, Exp> l;
     while(!s.empty()) {
       l = (HashMap<String, Exp>) s.pop();
@@ -181,7 +182,7 @@ Exp var():
     }
     System.out.println("Variable " + t.toString() + " does not exist !!");
     System.exit(0);
-  }
+  })
 }
 
 Exp print():
@@ -205,6 +206,35 @@ Exp factor():
 { Token t; Exp a; }
 {
     t=<NUMBER> { return new Num(Double.parseDouble(t.toString())); }
+}
+
+Exp affectation(Token t):
+{Exp a;}
+{
+    a=ifThenElse() {
+    Stack<HashMap<String, Exp>> s = new Stack<HashMap<String, Exp>>();
+    HashMap<String, Exp> l;
+    boolean exist = false;
+    Aff aff =null;
+    while(!stack.empty() || exist == false) {
+      l = (HashMap<String, Exp>) stack.pop();
+      s.push(l);
+      if(l.containsKey(t.toString())) {
+        aff = new Aff(t.toString(), a);
+        l.put(t.toString(), a);
+        exist = true;
+      }
+    }
+    while(!s.empty()){
+      stack.push(s.pop());
+    }
+    if(exist){
+      return aff;
+    }else{
+      System.out.println("Variable "+t.toString()+" was not previously declared");
+      System.exit(0);
+    }
+  }
 }
 
 /*
