@@ -3,3 +3,5 @@ let in 7+2 end
 let in 8<12 end
 let in if if 1 then 1 else 0 then 42 else 51 end
 let var x := 42 var y := 51 in print(x+y), print(x-y), print(x*y), print(x/y)  end
+let var i:=10 in print(i), let var i:=i*i in print(i) end, print(i) end
+let var foo := 1 var bar := 1 + foo var baz := bar * bar in foo, bar * baz end

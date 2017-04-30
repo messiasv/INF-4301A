@@ -71,6 +71,7 @@ void mainloop():
           System.out.println("Pretty Print:\n" + PrettyPrinter.visit(a) + "\n");
           System.out.println("Evaluation: " + Evaluateur.visit(a) + "\n");
           System.out.println("******************************************************");
+          stack.clear();
         }
       }
     )*
@@ -95,6 +96,7 @@ Exp letInEnd():
   )*
   <IN> (a=ifThenElse() {exp.add(a);}(<SEPARATOR>)?)* <END> {
     a = new LetInEnd(scope, exp);
+    stack.pop();
     return a;
   }
 }
@@ -161,6 +163,7 @@ Exp change():
   | a = var() {return a;}
   | "(" a=comp() ")" {return a;}
   | a = print() {return a;}
+  | a = letInEnd() {return a;}
 }
 
 Exp var():
