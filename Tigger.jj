@@ -78,10 +78,11 @@ void mainloop():
           }
           System.out.println(pp);
           double e=0;
+          System.out.println("Evaluation: \n"); //Fonctionne pas bien
           for(int i =0; i<a.size();i++){
             e=Evaluateur.visit(a.get(i));
+            System.out.println(e+ "\n"); //Fonctionne pas bien
           }
-          System.out.println("Evaluation: \n"+e+ "\n"); //Fonctionne pas bien
         }
       }
     )*
@@ -109,11 +110,15 @@ ArrayList<Exp> letInEnd():
 Exp ifThenElse():
 {Exp a,b,c;}
 {
-  (//In case there is an if then else operator
-    <IF> a = ifThenElse() <THEN> b = ifThenElse() <ELSE> c=ifThenElse() {if(Evaluateur.visit(a)==1){return b;}else return c;}
-  )
-  |(//In case there is no if then else operator
-    a = comp() {return a;}
+  (
+    (//In case there is an if then else operator
+      <IF> a = ifThenElse() <THEN> b = ifThenElse() <ELSE> c=ifThenElse() {
+        a = new IfThenElse(a, b, c);
+      }
+    ) |
+    (//In case there is no if then else operator
+      a = comp()
+    )
   ) {return a;}
 }
 

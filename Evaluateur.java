@@ -34,6 +34,12 @@ public class Evaluateur{
 			case "Print":
 				System.out.println("Print:\n"+visit(((Print)e).getPrint()));
 				return 0;
+			case "IfThenElse":
+				if(visit(((IfThenElse)e).getCond()) == 1.0) {
+					return visit(((IfThenElse)e).getTrueBranch());
+				} else {
+					return visit(((IfThenElse)e).getFalseBranch());
+				}
 			default:
 				throw new Error("Unknown case found!");
 		}
