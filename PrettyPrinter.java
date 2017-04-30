@@ -1,4 +1,5 @@
 import ast.*;
+import java.util.HashMap;
 
 public class PrettyPrinter{
 	public static String visit(Exp e){
@@ -30,17 +31,23 @@ public class PrettyPrinter{
 			case "Gt":
 				return visit(((Bin)e).getLeft()) +" > " + visit(((Bin)e).getRight());
 			case "Var":
-				return "var "+((Var)e).getName()+" := "+visit(((Var)e).getValue());
+				return ((Var)e).getName();
 			case "Print":
-				Exp tmp = ((Print)e).getPrint();
-				if(tmp.getClass().getSimpleName().equals("Var")){
-					return "print("+((Var)tmp).getName()+")";
-				}else
-					return "print("+visit(tmp)+")";
+				return "print("+visit(((Print)e).getPrint())+")";
 			case "IfThenElse":
 				return "if (" + visit(((IfThenElse)e).getCond()) + ") then "
 					+ visit(((IfThenElse)e).getTrueBranch())
 					+ " else " + visit(((IfThenElse)e).getFalseBranch());
+			case "LetInEnd":
+				String LetInEndStr = "let\n";
+				for(HashMap.Entry<String,Exp> var : ((LetInEnd)e).getVariables().entrySet()) {
+					LetInEndStr += "  var " + var.getKey() + " := " + visit(var.getValue()) + "\n";
+				}
+				LetInEndStr += "in\n";
+				for(Exp instr : ((LetInEnd)e).getInstructions()) {
+					LetInEndStr += " " + visit(instr) + "\n";
+				}
+				return LetInEndStr + "end\n";
 		}
 		return e.getClass().getSimpleName();
 	}

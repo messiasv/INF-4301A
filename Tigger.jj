@@ -30,11 +30,9 @@ public class Tigger
 							e.printStackTrace();
 					}
 				} else {
-          while(true){
       			  System.out.println("Please insert an expression:");
 	            parser = new Tigger(System.in);
               parser.mainloop();
-			    }
         }
     }
 }
@@ -64,43 +62,41 @@ TOKEN:
 
 // Main lopp: read expressions on a line until end of file.
 //     mainloop -> (expression <EOL>)* <EOF>
-// System.out.println("pretty-print: "+PrettyPrinter.visit(a));
-// System.out.println("eval: "+Evaluateur.visit(a)+"\n");
 void mainloop():
-{ ArrayList<Exp> a; }
+{ Exp a; }
 {
     (
       a = letInEnd() <EOL> {
         if(a!=null){
-          String pp = "Pretty Print: \n";
-          for(int i =0; i<a.size();i++){
-            pp+=PrettyPrinter.visit(a.get(i))+"\n";
-          }
-          System.out.println(pp);
-          double e=0;
-          System.out.println("Evaluation: \n"); //Fonctionne pas bien
-          for(int i =0; i<a.size();i++){
-            e=Evaluateur.visit(a.get(i));
-            System.out.println(e+ "\n"); //Fonctionne pas bien
-          }
+          System.out.println("Pretty Print:\n" + PrettyPrinter.visit(a) + "\n");
+          System.out.println("Evaluation: " + Evaluateur.visit(a) + "\n");
+          System.out.println("******************************************************");
         }
       }
     )*
     <EOF>
 }
 
-ArrayList<Exp> letInEnd():
+Exp letInEnd():
 {Token t; Exp a=null; Exp b; ArrayList<Exp> exp =new ArrayList<Exp>();}
 {
-  <LET> {HashMap<String, Exp> scope = new HashMap<String, Exp>();
-        stack.push(scope);}
-  ("var" t=<WORD> ":=" b=ifThenElse() {Exp exist = scope.put(t.toString(), b);
-                                          if(exist != null){
-                                            System.out.println("Error: Variable "+ t.toString()+" already declared in this scope");
-                                            System.exit(0);
-                                          }}
+  <LET> {
+          HashMap<String, Exp> scope = new HashMap<String, Exp>();
+          stack.push(scope);
+        }
+  (
+    "var" t=<WORD> ":=" b=ifThenElse() {
+      Exp exist = scope.put(t.toString(), b);
+      if(exist != null){
+        System.out.println("Error: Variable "+ t.toString() + " already declared in this scope");
+        System.exit(0);
+      }
+    }
   )*
-  <IN> (a=ifThenElse() {exp.add(a);}(<SEPARATOR>)?)* <END> {return exp;}
+  <IN> (a=ifThenElse() {exp.add(a);}(<SEPARATOR>)?)* <END> {
+    a = new LetInEnd(scope, exp);
+    return a;
+  }
 }
 
 //E -> T(+T|-T)

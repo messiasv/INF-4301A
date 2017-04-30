@@ -32,7 +32,7 @@ public class Evaluateur{
 			case "Var":
 				return visit(((Var)e).getValue());
 			case "Print":
-				System.out.println("Print:\n"+visit(((Print)e).getPrint()));
+				System.out.println("Print:\n  "+visit(((Print)e).getPrint()));
 				return 0;
 			case "IfThenElse":
 				if(visit(((IfThenElse)e).getCond()) == 1.0) {
@@ -40,6 +40,12 @@ public class Evaluateur{
 				} else {
 					return visit(((IfThenElse)e).getFalseBranch());
 				}
+			case "LetInEnd":
+				double eval = 0;
+				for(Exp inst : ((LetInEnd)e).getInstructions()) {
+					eval = visit(inst);
+				}
+				return eval;
 			default:
 				throw new Error("Unknown case found!");
 		}
