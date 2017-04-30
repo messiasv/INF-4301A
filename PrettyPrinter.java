@@ -37,6 +37,10 @@ public class PrettyPrinter{
 					return "print("+((Var)tmp).getName()+")";
 				}else
 					return "print("+visit(tmp)+")";
+			case "IfThenElse":
+				return "if (" + visit(((IfThenElse)e).getCond()) + ") then "
+					+ visit(((IfThenElse)e).getTrueBranch())
+					+ " else " + visit(((IfThenElse)e).getFalseBranch());
 		}
 		return e.getClass().getSimpleName();
 	}
