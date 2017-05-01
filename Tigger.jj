@@ -1,7 +1,7 @@
 // Options for JavaCC.
-options { LOOKAHEAD=1; FORCE_LA_CHECK=true; STATIC=false;}
+options { LOOKAHEAD=1;}
 
-// Fonction principale
+// Main function
 PARSER_BEGIN(Tigger)
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -13,14 +13,14 @@ import ast.*;
 
 public class Tigger
 {
-    public static Stack<HashMap<String, Exp>> stack;
+    public static Stack<HashMap<String, Exp>> stack; //Used for scope modelisation
     public static void main(String args[]) throws ParseException
     {
 
-        stack = new Stack<HashMap<String, Exp>>();
+        stack = new Stack<HashMap<String, Exp>>(); //Each HashMap is a scope
 
         Tigger parser = null;
-				if(args.length>0) {
+				if(args.length>0) { //Reading source from a file
           try {
             InputStream is = new FileInputStream(args[0]);
             parser = new Tigger(is);
@@ -29,7 +29,7 @@ public class Tigger
             catch(IOException e){
 							e.printStackTrace();
 					}
-				} else {
+				} else { //Reading source frome System.in
       			  System.out.println("Please insert an expression:");
 	            parser = new Tigger(System.in);
               parser.mainloop();
@@ -44,25 +44,24 @@ SKIP: { " " | "\r" | "\t" }
 // Token specifications.
 TOKEN:
 {
-    < NUMBER: (<DIGIT>)+ ("." (<DIGIT>)*)? >  // A decimal number.
-|   < DIGIT: ["0"-"9"] >                      // A decimal digit.
-|   < EOL: "\n" >                             // End of line.
+    < NUMBER: (<DIGIT>)+ ("." (<DIGIT>)*)? >
+|   < DIGIT: ["0"-"9"] >
+|   < EOL: "\n" >
 |   < PRINT: "print">
-|   <IF: "if">
-|   <THEN: "then">
-|   <ELSE: "else">
-|   <LET: "let">
-|   <IN: "in">
-|   <END: "end">
-|   <VAR: "var">
-|   <QUIT: "quit">
+|   < IF: "if">
+|   < THEN: "then">
+|   < ELSE: "else">
+|   < LET: "let">
+|   < IN: "in">
+|   < END: "end">
+|   < VAR: "var">
+|   < QUIT: "quit">
 |   < WORD: <LETTER> ((<DIGIT>)* ((<LETTER>)*)?)?>
 |   < LETTER: ["a"-"z","A"-"Z"]>
-|   <SEPARATOR: ",">
+|   < SEPARATOR: ",">
 }
 
-// Main lopp: read expressions on a line until end of file.
-//     mainloop -> (expression <EOL>)* <EOF>
+//Start of the parser
 void mainloop():
 { Exp a; }
 {
@@ -70,7 +69,7 @@ void mainloop():
       a = letInEnd() <EOL> {
         if(a!=null){
           System.out.println("Pretty Print:\n" + PrettyPrinter.visit(a) + "\n");
-          //System.out.println("Evaluation: " + Evaluateur.visit(a) + "\n");
+          //Preparation for the next expression
           System.out.println("******************************************************");
           stack.clear();
         }
@@ -80,12 +79,13 @@ void mainloop():
     | <QUIT><EOL> {System.out.println("Credits : MESSIAS Valentin & SAUVION Lorkan"); System.exit(0);}
 }
 
+//Each expression must start by a "let", have an "in" inside and finish by an "end"
 Exp letInEnd():
 {Token t; Exp a=null; Exp b; ArrayList<Exp> exp =new ArrayList<Exp>();}
 {
   <LET> {
           HashMap<String, Exp> scope = new HashMap<String, Exp>();
-          stack.push(scope);
+          stack.push(scope); //Creating a new scope
         }
   (
     "var" t=<WORD> ":=" b=ifThenElse() {
@@ -103,26 +103,27 @@ Exp letInEnd():
   }
 }
 
-//E -> T(+T|-T)
-//T -> F(*F|/F)
-//F -> <NUM> |(E)
-
+//Next higher priority is IfThenElse
 Exp ifThenElse():
 {Exp a,b,c;}
 {
   (
-    (//In case there is an if then else operator
-      <IF> a = ifThenElse() <THEN> b = ifThenElse() <ELSE> c=ifThenElse() {
+    (
+      //An IfThenElse cannot have multiple expressions in it
+      <IF> a = ifThenElse() <THEN> b = ifThenElse()
+      (<SEPARATOR> {System.out.println("IfThenElse does not support mutiples expressions"); System.exit(0);})?
+      <ELSE> c=ifThenElse() (<SEPARATOR> {System.out.println("IfThenElse does not support mutiples expressions"); System.exit(0);})?
+      {
         a = new IfThenElse(a, b, c);
       }
     ) |
-    (//In case there is no if then else operator
-    a = comp() (<SEPARATOR> {System.out.println("IfThenElse does not support mutiples expressions"); System.exit(0);})?
+    (
+    a = comp()
     )
   ) {return a;}
 }
 
-
+//Next higher priority is binary comparison
 Exp comp():
 {Exp a,b;}
 {
@@ -134,10 +135,11 @@ Exp comp():
   | "<"  b = expression() {a = new Lt(a,b);}
   | ">=" b = expression() {a = new Ge(a,b);}
   | ">"  b = expression() {a = new Gt(a,b);}
-  | {return a;} // if we haven't any comparison to do
+  | {return a;}
   ) {return a;}
 }
 
+//Next higher priority is binary operation, starting with add and sub
 Exp expression():
 {Exp a,b;}
 {
@@ -148,6 +150,7 @@ Exp expression():
 	)*	{return a;}
 }
 
+//Next higher priority are mul and div
 Exp term():
 {Exp a,b;}
 {
@@ -158,6 +161,7 @@ Exp term():
 	)*	{return a;}
 }
 
+//Grant multiple scope and multiple imbricated operations
 Exp change():
 {Token t; Exp a;}
 {
@@ -171,6 +175,7 @@ Exp change():
   )
 }
 
+//Getting values for a Variable t (if already declared)
 Exp var(Token t):
 {Exp a, b;}
 {
@@ -188,6 +193,7 @@ Exp var(Token t):
   }
 }
 
+//Call the Evaluateur visitor
 Exp print():
 {Token t; Exp a;}
 {
@@ -196,6 +202,7 @@ Exp print():
     return new Print(a);}
 }
 
+//Signed number
 Exp unary():
 {Token t; Exp a;}
 {
@@ -206,13 +213,14 @@ Exp unary():
   ){return a;}
 }
 
-// Factor of an expression.
+// Unsigned number
 Exp factor():
 { Token t; Exp a; }
 {
     t=<NUMBER> { return new Num(Double.parseDouble(t.toString())); }
 }
 
+//If a Variable already exists, give it a new value
 Exp affectation(Token t):
 {Exp a;}
 {
@@ -241,14 +249,3 @@ Exp affectation(Token t):
     }
   }
 }
-
-/*
-Make AST :
-/Exp/
-	/Bin/ Exp Exp
-		Add
-		Sub
-		Mul
-		Div
-	Num double
-*/

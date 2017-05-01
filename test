@@ -1,8 +1,9 @@
 let in print(4+5) end
-let in print(8<12) end
+let in print(8.5<12.9) end
 let in print(if if 1 then 1 else 0 then 42 else 51) end
 let var x := 42 var y := 51 in print(x+y), print(x-y), print(x*y), print(x/y)  end
 let var i:=10 in print(i), let var i:=i*i in print(i) end, print(i) end
 let var foo := 1 var bar := 1 + foo var baz := bar * bar in print(foo), print(bar * baz) end
 let var x:=5 in print(x), let in x:=7, print(x) end, print(x), x:=4, print(x) end
 let var x:=5 in print(x+y) end
+Cette dernière ligne arrête le programme, car la variable y n'existe pas.

@@ -2,7 +2,24 @@ Rapport de projet Compilation
 MESSIAS Valentin
 SAUVION Lorkan
 
-Notre compilateur supporte actuellement les fonctionnalités suivantes (note : exp est à remplacer par n'importe quelle expression) :
+I - Mode d'emploi
+II - Fonctionnalités
+III - Principe
+IV - Problèmes rencontrés
+
+I - Mode d'emploi
+Pour compiler le programme, il suffit d'utiliser la commande "make".
+Pour supprimer les fichiers compilés et ne conserver que le code source, utlisez la commande "make clean"
+Pour lancer le programme en utilisant un fichier texte comme source, utilisez la commande "java Tigger NomDuFichier"
+Pour lancer le programme en utilsant System.in comme source, utilisez la commande "java Tigger"
+Nous fournissons un fichier de test. Pour l'utilisez, lancez la programme avec la commande "java Tigger test"
+Celui-ci executera plusieurs lignes de test, toutes fonctionnelles, puis une ligne de test fermant le programme car détection d'une erreur.
+
+Chaque instruction doit être de la forme : let (var <NOM_DE_VARIABLE>:=<EXP>)* in (<EXP (,<EXP>)?)* end   
+avec <EXP> n'importe quelle expression
+
+II - Fonctionnalités
+Notre compilateur supporte actuellement les fonctionnalités suivantes
 	- Support des entiers et des décimaux (en séparant avec un point ".")
 Ex : 	1
 			1.0
@@ -20,7 +37,7 @@ Ex : 	print(1)
 Ex : 	if 1<>6 then 56 else 67/41.6
 			if 5=5 then 5*5 else 5-5
 	- Support des instructions multiples, via une virgule ","
-Ex : print(6), print(6+1)
+Ex : print(6), print(6+1), print(3.7)
 Note : On ne peut pas mettre d'instructions multiple dans un If-Then-Else, car c'est une expression qui doit retourner une valeur.
 	- Support du Let-In-End et des déclarations de variables
 Ex : 	let var x:=5 in print(x) end
@@ -33,13 +50,6 @@ Ex : 	let var x:=5 in let var x:=x+x in print(x) end, print(x) end
 	- La lecture d'un fichier texte en tant que source
 	- L'arrêt du programme par la commande "quit" (à utiliser en dehors de tout scope)
 	
-Pour compiler le programme, il suffit d'utiliser la commande "make".
-Pour supprimer les fichiers compilés et ne conserver que le code source, utlisez la commande "make clean"
-Pour lancer le programme en utilisant un fichier texte comme source, utilisez la commande "java Tigger NomDuFichier"
-Pour lancer le programme en utilsant System.in comme source, utilisez la commande "java Tigger"
-Nous fournissons un fichier de test. Pour l'utilisez, lancez la programme avec la commande "java Tigger test"
-Celui-ci executera plusieurs lignes de test, toutes fonctionnelles, puis une ligne de test fermant le programme car détection d'une erreur.
-
 Les erreurs détéctées pouvant fermer le programme sont :
 	- Déclaration d'une variable dans un scope possédant déjà une variable de même nom (attention, la déclaration d'une variable dans un scope imbriqué dans un scope possédant une variable de même nom fonctionne)
 Ex :  let var x:= exp var x:= exp in end 	est une erreur
@@ -52,6 +62,15 @@ Ex : let in if 1 then 4, 6 else 7, 2 end	est une erreur.
 	
 L'affichage des "print()" se fait avant l'affichage du PrettyPrinter
 
+III - Principe
+Les visiteurs PrettyPrinter et Evaluateur fonctionnent n'ont pas tout à fait la même structure que le patern Visiteur, même si le principe est le même.
+Dans nos visiteurs, nous n'avons qu'une seule méthode statique visit(), mais composé d'un bloc switch possédant un bloc case par possibilité d'objet visitable, là où un Visiteur normal doit définir une nouvelle méthode visit() pour chaque objet visitable.
+Cela est rendu possible par le fait que tous nos objets visitables hérites d'une même classe Exp.
+Ainsi, lors de l'executution, il nous suffit de vérifier quel est la classe concrète de l'objet visité.
+Nous avons procédé ainsi pour ne pas avoir à réecrire dans chaque visiteur une méthode visit().
+
+
+IV - Problèmes rencontrés
 Au niveau des problèmes non résolus, lorsque l'on fait l'affectation d'une variable déclarée dans la même portée, le PrettyPrinter affiche la déclaration avec la valeur de l'affectation.
 Par exemple, let var x:=5 in print(x), x:=x-1, print(x) end affichera :
 
@@ -69,6 +88,5 @@ end
 Cette erreur est dû au fait que le Pretty Printer ne se lance qu'à la toute fin du parsing.
 En effet, nous conservons dans une HashMap les expressions parsées et nous les affichons à la fin de la ligne.
 Or, l'execution se fait en amont du print, c'est pourquoi l'affectation de x en (x-1) est déjà faite lorsque le PrettyPrinter se lance.
-L'Evaluateur, lui, ne se lance qu'avec un print, donc pendant l'execution.
 Nous n'avons malheuresement pas réussi à corriger ce problème.
-
+L'Evaluateur, lui, ne se lance qu'avec un print, pendant l'execution, il n'a donc aucun problème à ce niveau.
