@@ -41,13 +41,13 @@ public class PrettyPrinter{
 			case "LetInEnd":
 				String LetInEndStr = "let\n";
 				for(HashMap.Entry<String,Exp> var : ((LetInEnd)e).getVariables().entrySet()) {
-					LetInEndStr += "  var " + var.getKey() + " := " + visit(var.getValue()) + "\n";
+					LetInEndStr += " var " + var.getKey() + " := " + visit(var.getValue())+"\n";
 				}
 				LetInEndStr += "in\n";
 				for(Exp instr : ((LetInEnd)e).getInstructions()) {
 					LetInEndStr += " " + visit(instr) + "\n";
 				}
-				return LetInEndStr + "end\n";
+				return LetInEndStr + "end";
 			case "Aff":
 				return ((Aff)e).getName() + " := " + visit(((Aff)e).getValue());
 		}

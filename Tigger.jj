@@ -55,6 +55,7 @@ TOKEN:
 |   <IN: "in">
 |   <END: "end">
 |   <VAR: "var">
+|   <QUIT: "quit">
 |   < WORD: <LETTER> ((<DIGIT>)* ((<LETTER>)*)?)?>
 |   < LETTER: ["a"-"z","A"-"Z"]>
 |   <SEPARATOR: ",">
@@ -76,6 +77,7 @@ void mainloop():
       }
     )*
     <EOF>
+    | <QUIT><EOL> {System.out.println("Credits : MESSIAS Valentin & SAUVION Lorkan"); System.exit(0);}
 }
 
 Exp letInEnd():
@@ -115,7 +117,7 @@ Exp ifThenElse():
       }
     ) |
     (//In case there is no if then else operator
-      a = comp()
+    a = comp() (<SEPARATOR> {System.out.println("IfThenElse does not support mutiples expressions"); System.exit(0);})?
     )
   ) {return a;}
 }
@@ -189,8 +191,8 @@ Exp var(Token t):
 Exp print():
 {Token t; Exp a;}
 {
-  t=<PRINT> "(" a=comp() ")" {
-    System.out.println("Evaluation : "+Evaluateur.visit(new Print(a))+"\n");
+  t=<PRINT> "(" a=ifThenElse() ")" {
+    System.out.println(""+Evaluateur.visit(new Print(a))+"\n");
     return new Print(a);}
 }
 
